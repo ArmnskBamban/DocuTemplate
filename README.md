@@ -5,6 +5,7 @@
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![Tests](https://img.shields.io/badge/tests-32%2B%20passing-green.svg)]()
 [![Docker](https://img.shields.io/badge/docker-ready-blue.svg)]()
+[![GitHub](https://img.shields.io/github/v/release/ArmnskBamban/DocuTemplate)]()
 
 **DocuTemplate** mengubah laporan praktikum yang sudah jadi (`.docx`) menjadi template bersih yang siap dipakai ulang. Tool ini:
 
@@ -13,51 +14,187 @@
 - ✅ **Ganti data identitas dengan placeholder** — Nama/NIM/Kelas → {{NAMA}}/{{NIM}}/{{KELAS}}
 - ✅ **Bekerja otomatis tanpa AI** — 100% deterministik, tidak perlu internet/API key
 
-**Bukan tools untuk menulis laporan otomatis.** Ini adalah tools untuk menyiapkan template — Anda tetap menulis sendiri di Word/LibreOffice setelah download template.
+---
 
-## 🚀 Cara Pakai (Web UI) — Paling Mudah!
+## 🎯 Quick Start (3 Menit) — Untuk User Umum
 
-### 1. Install & Jalankan
+### 📦 Install & Jalankan dengan Docker (Paling Mudah)
 
-**Windows (tanpa Docker):**
+**1. Download & Install Docker**  
+Download dari: https://www.docker.com/get-started/
 
-```cmd
-# Terminal 1 - Backend
-cd /d D:\Zcode\project7\backend
-.venv\Scripts\python.exe -m uvicorn praktikit.api.app:app --host 127.0.0.1 --port 8000
-
-# Terminal 2 - Frontend (buka terminal baru)
-cd /d D:\Zcode\project7\frontend
-npm run dev
+**2. Clone Project**
+```bash
+git clone https://github.com/ArmnskBamban/DocuTemplate.git
+cd DocuTemplate
 ```
 
-**Atau pakai Docker (semua platform):**
-
+**3. Jalankan**
 ```bash
 docker compose up --build
 ```
 
-### 2. Buka Browser
-
+**4. Buka Browser**
 ```
 http://localhost:3000
 ```
 
-### 3. Ikuti 5 Langkah di UI
+**5. Upload file `.docx` laporan Anda → Download template bersih!**
+
+> **💡 Tidak ingin install Docker?** Lihat [Cara Install Manual](#-install-manual-tanpa-docker) di bawah.
+
+---
+
+## 📋 Contoh Input → Output
+
+### Input (Laporan Lama):
+```
+═══════════════════════════════════════
+LAPORAN PRAKTIKUM DATA MINING
+
+Nama    : John Doe
+NIM     : 24100001
+Kelas   : TI-A
+Modul   : Random Forest
+
+BAB I PENDAHULUAN
+1.1 Latar Belakang
+Random forest adalah algoritma machine learning...
+a) Kelebihan pertama
+b) Kelebihan kedua
+c) Kelebihan ketiga
+
+1.2 Tujuan
+Tujuan praktikum ini adalah...
+```
+
+### Output (Template Bersih):
+```
+═══════════════════════════════════════
+LAPORAN PRAKTIKUM DATA MINING
+
+Nama    : {{NAMA}}
+NIM     : {{NIM}}
+Kelas   : {{KELAS}}
+Modul   : {{MODUL}}
+
+BAB I PENDAHULUAN
+1.1 Latar Belakang
+[Isi Latar Belakang di sini]
+
+1.2 Tujuan
+[Isi Tujuan di sini]
+```
+
+**Yang Dihapus:** Konten body, list items (`a)`, `b)`, `c)`, `1)`, dll), tabel data  
+**Yang Dipertahankan:** Format, heading, struktur, gambar
+
+---
+
+## 🚀 Cara Pakai (Web UI)
+
+Setelah install (via Docker atau manual), buka **http://localhost:3000** dan ikuti 5 langkah:
 
 1. **Upload** — Pilih file `.docx` laporan lama (max 25 MB)
-2. **Analisis** — System analisis struktur dokumen (otomatis)
-3. **Review** — Cek struktur yang terdeteksi (heading, tabel, gambar)
-4. **Variabel** — Edit placeholder untuk data identitas ({{NAMA}}, {{NIM}}, dll)
-5. **Generate** — Pilih mode:
-   - **Clean Template** — semua placeholder kosong, siap diisi manual
-   - **Personalized** — placeholder diisi dengan data Anda
+2. **Analisis** — System otomatis analisis struktur
+3. **Review** — Cek struktur yang terdeteksi
+4. **Variabel** — Edit placeholder untuk data identitas
+5. **Generate** — Download template bersih atau personalized
 
-### 4. Download & Pakai
+---
 
-- Download file `.docx` yang sudah bersih
-- Buka di Microsoft Word / LibreOffice Writer
-- Isi bagian yang kosong dengan konten laporan Anda
+## 📋 Cara Install Manual (Tanpa Docker)
+
+### Prerequisite
+- ✅ **Python 3.11+** — Download: https://www.python.org/downloads/
+- ✅ **Node.js 20+** — Download: https://nodejs.org/
+
+### Windows
+```cmd
+# Clone project
+git clone https://github.com/ArmnskBamban/DocuTemplate.git
+cd DocuTemplate
+
+# Install backend (Terminal 1)
+cd backend
+python -m venv .venv
+.venv\Scripts\activate
+pip install -e ".[dev]"
+
+# Install frontend (Terminal 2)
+cd ../frontend
+npm install
+```
+
+### macOS / Linux
+```bash
+# Clone project
+git clone https://github.com/ArmnskBamban/DocuTemplate.git
+cd DocuTemplate
+
+# Install backend
+cd backend
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -e ".[dev]"
+
+# Install frontend
+cd ../frontend
+npm install
+```
+
+### Jalankan
+```bash
+# Backend (Terminal 1)
+cd backend
+.venv/bin/python -m uvicorn praktikit.api.app:app --host 127.0.0.1 --port 8000
+
+# Frontend (Terminal 2)
+cd frontend
+npm run dev
+```
+
+Buka: **http://localhost:3000**
+
+---
+
+## 💻 CLI (Command Line) — untuk User Advanced
+
+```bash
+# Install (sudah termasuk saat docker/manual install)
+cd backend
+pip install -e ".[dev]"
+
+# Analyze laporan
+uv run praktikit analyze laporan.docx
+
+# Generate template
+uv run praktikit clean laporan.docx --output template.docx
+
+# Personalized (isi data Anda)
+uv run praktikit clean laporan.docx \
+  --output laporan-saya.docx \
+  --var NAMA "Jiyad Rifqi" \
+  --var NIM "2411533003" \
+  --var KELAS "TI-3A"
+```
+
+---
+
+## 🔧 API & Docker — untuk Developer
+
+**REST API Documentation:** http://localhost:8000/docs (Swagger UI)
+
+**Docker Deployment:**
+```bash
+# Development
+docker compose up --build
+
+# Production
+docker compose -f docker-compose.prod.yml up -d
+```
+
+Lihat [`DEPLOYMENT.md`](DEPLOYMENT.md) untuk panduan lengkap.
 
 ---
 
