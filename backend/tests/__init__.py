@@ -1,0 +1,2 @@
+"""PraktiKit test suite."""
+

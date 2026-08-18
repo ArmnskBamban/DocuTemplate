@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+.npm
+.pnpm
+
+# Build output
+.next/
+out/
+dist/
+
+# Testing
+coverage/
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env.local
+.env.*.local
+
+# Documentation
+*.md
+!README.md
+
+# Misc
+.next-webpack/
+.next-static/

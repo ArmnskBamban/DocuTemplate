@@ -1,0 +1,60 @@
+version: "3.9"
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: praktikit-backend
+    restart: unless-stopped
+    environment:
+      - MAX_UPLOAD_SIZE=${MAX_UPLOAD_SIZE:-26214400}
+      - SESSION_TTL=${SESSION_TTL:-1800}
+      - AUTO_THRESHOLD=${AUTO_THRESHOLD:-0.90}
+      - REVIEW_THRESHOLD=${REVIEW_THRESHOLD:-0.70}
+      - STRICT_LEAK_CHECK=${STRICT_LEAK_CHECK:-true}
+      - LEAK_SIMILARITY_THRESHOLD=${LEAK_SIMILARITY_THRESHOLD:-0.6}
+      - AI_ENABLED=${AI_ENABLED:-false}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - TEMP_DIRECTORY=/tmp/praktikit
+      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:3000}
+    volumes:
+      - praktikit-temp:/tmp/praktikit
+    networks:
+      - praktikit-network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health').read()"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # Same-origin proxy by default; override for split-domain deployment
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-}
+    container_name: praktikit-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - praktikit-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+networks:
+  praktikit-network:
+    driver: bridge
+
+volumes:
+  praktikit-temp:

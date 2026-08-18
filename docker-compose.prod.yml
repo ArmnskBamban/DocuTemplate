@@ -1,0 +1,54 @@
+version: "3.9"
+
+# Production docker-compose configuration
+# Usage: docker-compose -f docker-compose.prod.yml --env-file .env up -d
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: praktikit-backend
+    restart: unless-stopped
+    env_file: ./backend/.env
+    volumes:
+      - praktikit-temp:/tmp/praktikit
+    networks:
+      - praktikit-network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health').read()"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    # No ports exposed to host - only accessible via frontend proxy
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # Same-origin proxy (empty = relative paths)
+        NEXT_PUBLIC_API_URL: ""
+    container_name: praktikit-frontend
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8080:80"  # Only bind to localhost - use reverse proxy
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - praktikit-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+networks:
+  praktikit-network:
+    driver: bridge
+
+volumes:
+  praktikit-temp:
